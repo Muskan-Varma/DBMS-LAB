@@ -1,0 +1,75 @@
+use practice
+switched to db practice
+
+db.createCollection("orders")
+
+db.orders.insertOne
+(
+    {
+        "cus_id" : "A1", 
+        "amount" : 400, 
+        "status" : "P"
+    }
+)
+
+db.orders.insertOne({"cus_id" : "B1", "amount" : 300, "status" : "D"})
+
+db.orders.insertOne({"cus_id" : "A1", "amount" : 200, "status" : "F"})
+
+db.orders.insertOne({"cus_id" : "C1", "amount" : 200, "status" : "F"})
+
+db.orders.insertOne({"cus_id" : "B1", "amount" : 700, "status" : "P"})
+
+db.orders.insertOne({"cus_id" : "B1", "amount" : 800, "status" : "P"})
+
+db.orders.mapReduce
+( 
+    function () 
+    {
+        emit(this.cus_id, this.amount);
+    }, 
+    function (key, values) 
+    {
+        return Array.sum(values)
+    }, 
+    { query: { status : "P" }, out: "order_total" }
+)
+
+db.orders.mapReduce
+( 
+    function () 
+    {
+        emit(this.cus_id, this.amount);
+    }, 
+    function (key, values) 
+    {
+        return Array.avg(values)
+    }, 
+    { out: "order_avg" }
+)
+
+db.orders.mapReduce
+( 
+    function () 
+    {
+        emit(this.cus_id, this.amount);
+    }, 
+    function (key, values) 
+    {
+        return Math.min.apply(Math, values)
+    }, 
+    { out: "order_min" }
+)
+
+db.orders.mapReduce
+(
+    function () 
+    {
+        emit(this.cus_id, this.amount);
+    }, 
+    function (key, values) 
+    {
+        return Math.max(Array(values));
+    }, 
+    { query : {status : "F"}, out : "order_max"}
+)

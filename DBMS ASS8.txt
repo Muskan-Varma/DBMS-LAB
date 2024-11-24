@@ -1,0 +1,61 @@
+-- Create the Books table
+CREATE TABLE Books (
+   AccNo INT PRIMARY KEY,
+   Title VARCHAR2(100),
+   Author VARCHAR2(50),
+   Publisher VARCHAR2(50),
+   Count INT
+);
+
+-- Create the Library_Audit table
+CREATE TABLE Library_Audit (
+   AccNo INT,
+   Title VARCHAR2(100),
+   Author VARCHAR2(50),
+   Publisher VARCHAR2(50),
+   Count INT,
+   ChangeType VARCHAR2(10),
+   ChangeDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create a before delete trigger
+CREATE OR REPLACE TRIGGER Before_Delete_Books
+BEFORE DELETE ON Books
+FOR EACH ROW
+BEGIN
+   INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, ChangeType)
+   VALUES (:OLD.AccNo, :OLD.Title, :OLD.Author, :OLD.Publisher, :OLD.Count, 'DELETE');
+END Before_Delete_Books;
+/
+
+-- Create an after update trigger
+CREATE OR REPLACE TRIGGER After_Update_Books
+AFTER UPDATE ON Books
+FOR EACH ROW
+BEGIN
+   IF :NEW.Count != :OLD.Count THEN
+      INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, ChangeType)
+      VALUES (:OLD.AccNo, :OLD.Title, :OLD.Author, :OLD.Publisher, :OLD.Count, 'UPDATE_COUNT');
+   ELSE
+      INSERT INTO Library_Audit (AccNo, Title, Author, Publisher, Count, ChangeType)
+      VALUES (:OLD.AccNo, :OLD.Title, :OLD.Author, :OLD.Publisher, :OLD.Count, 'UPDATE_OTHER');
+   END IF;
+END After_Update_Books;
+/
+
+INSERT INTO Books VALUES (1, 'Book1', 'Author1', 'Publisher1', 10);
+INSERT INTO Books VALUES (2, 'Book2', 'Author2', 'Publisher2', 15);
+
+DELETE FROM Books WHERE AccNo = 1;
+
+SELECT * FROM Library_Audit;
+
+UPDATE Books SET Count = 20 WHERE AccNo = 2;
+--for solving error
+ALTER TABLE Library_Audit MODIFY CHANGETYPE VARCHAR2(20);
+
+SELECT * FROM Library_Audit;
+
+UPDATE Books SET Title = 'UpdatedTitle' WHERE AccNo = 2;
+
+SELECT * FROM Library_Audit;

@@ -1,0 +1,60 @@
+create table borrower(roll_no number(4), doe date, name varchar2(20), status varchar2(20));
+
+drop table borrower;
+
+create table fine(roll_no number(20), dte date, amount float);
+
+drop table fine;
+
+insert into borrower values(10, TO_DATE('12-jan-2003', 'dd-mon-yyyy'), 'Muskan', 'I');
+insert into borrower values(44, TO_DATE('10-jul-2002', 'dd-mon-yyyy'), 'Shweta', 'I');
+insert into borrower values(75, TO_DATE('02-may-2000', 'dd-mon-yyyy'), 'Meera', 'I');
+
+
+declare
+   rn borrower.roll_no%TYPE;
+   n borrower.name%TYPE;
+   fa fine.amount%TYPE := 0;
+
+   br borrower%rowtype;
+
+   day_passed number;
+
+   book_returned EXCEPTION;
+
+begin
+   rn := :roll_no;
+   n := :name;
+
+   select * into br from borrower where roll_no = rn and name = n;
+
+   if br.status = 'R' then
+      raise book_returned;
+   else
+      if br.doe IS NOT NULL then
+         day_passed := sysdate - br.doe;
+
+         if day_passed >= 15 and day_passed <= 30 then
+            fa := day_passed * 5;
+         elsif day_passed > 30 then
+            fa := day_passed * 50;
+         end if;
+
+         if fa != 0 then
+            insert into fine values(br.roll_no, sysdate, fa);
+         end if;
+
+         update borrower set status = 'R' where roll_no = br.roll_no;
+      else
+         dbms_output.put_line('Error: DOE (Date of Enrollment) is NULL.');
+      end if;
+   end if;
+
+exception
+   when book_returned then
+      dbms_output.put_line('The mentioned book is already returned by the student for the specified roll number');
+end;
+
+select * from borrower;
+
+select * from fine;

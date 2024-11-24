@@ -1,0 +1,61 @@
+CREATE TABLE Result (
+    Roll NUMBER,
+    Name VARCHAR2(50),
+    Class VARCHAR2(50)
+);
+
+CREATE TABLE Stud_Marks (
+    Roll NUMBER,
+    Name VARCHAR2(50),
+    Class VARCHAR2(50),
+    Total_Marks NUMBER
+);
+
+
+CREATE OR REPLACE PROCEDURE proc_grade(
+    p_name IN VARCHAR2,
+    p_total_marks IN NUMBER,
+    p_class OUT VARCHAR2
+) AS
+BEGIN
+    IF p_total_marks >= 990 AND p_total_marks <= 1500 THEN
+        p_class := 'Distinction';
+    ELSIF p_total_marks >= 900 AND p_total_marks <= 989 THEN
+        p_class := 'First Class';
+    ELSIF p_total_marks >= 825 AND p_total_marks <= 899 THEN
+        p_class := 'Higher Second Class';
+    ELSE
+        p_class := 'Not Categorized';
+    END IF;
+END;
+
+
+
+
+DECLARE
+    v_roll NUMBER :=:Roll_No;
+    v_name VARCHAR2(50) := :Name;
+    v_total_marks NUMBER := :Marks;
+    v_class VARCHAR2(50);
+
+BEGIN
+    proc_grade(v_name, v_total_marks, v_class);
+
+    INSERT INTO Result(Roll, Name, Class)
+    VALUES (v_roll, v_name, v_class);
+
+    INSERT INTO Stud_Marks(Roll,Name,Class,Total_Marks)
+    VALUES (v_roll,v_name,v_class,v_total_marks);
+
+    COMMIT;
+   
+    DBMS_OUTPUT.PUT_LINE('Student: ' || v_name || ', Class: ' || v_class || ' - Result inserted.');
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLERRM);
+END;
+
+SELECT * FROM RESULT;
+
+SELECT * FROM Stud_Marks;

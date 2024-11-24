@@ -1,0 +1,14 @@
+create table area(radius number, area float);
+
+declare
+    rad number;
+    ar float;
+begin
+    for rad in 5..10 loop
+        ar:=3.14*rad*rad;
+        insert into area values(rad,ar);
+        dbms_output.put_line('Radius : '||rad||' Area : '||ar);
+    end loop;
+end;
+
+select * from area;

@@ -1,0 +1,130 @@
+use practice
+
+db.createCollection("books")
+
+db.books.insert
+(
+    {
+        "title" : "mongodb", 
+        "description" : "mongodb manual", 
+        "by" : "john", 
+        "url" : "www.mongodb.com", 
+        "tags" : ["databases", "mongo"], 
+        "likes" : 50
+    }
+)
+
+db.books.insert({"title" : "mongodb", "description" : "mongodb manual 2", "by" : "kevin", "url" : "www.mongodb2.com", "tags" : ["databases", "mongo"], "likes" : 100})
+
+db.books.insert({"title" : "cpp", "description" : "cpp manual", "by" : "sam", "url" : "www.cpp.com", "tags" : ["programming", "cpp"], "likes" : 60})
+
+db.books.insert({"title" : "java", "description" : "java manual", "by" : "john", "url" : "www.java.com", "tags" : ["programming", "java"], "likes" : 200})
+
+db.books.insert({"title" : "python", "description" : "python manual", "by" : "sara", "url" : "www.python.com", "tags" : ["programming", "python"], "likes" : 500})
+
+--1.additional fields of uname and comments
+db.books.insert
+(
+    {
+        "title" : "python", 
+        "description" : "python manual", 
+        "by" : "sara", 
+        "url" : "www.python.com", 
+        "tags" : ["programming", "python"], 
+        "likes" : 500, 
+        "username" : "ashishavhad", 
+        "comments" : ["comment1", "comment2", "comment2"]
+    }
+)
+--2.all cocuments with title mongodb
+db.books.find({"title" : "mongodb"})
+--3.by john or having title mongodb
+db.books.find
+(
+    {
+        $or : 
+        [
+            {"title" : "mongodb"}, 
+            {"by" : "john"}
+        ]
+    }
+)
+--4.by john and having title mongodb
+db.books.find
+(
+    {
+        $and : 
+        [
+            {"title" : "mongodb"}, 
+            {"by" : "john"}
+        ]
+    }
+)
+--5.documents whose likes are greater than 10
+db.books.find({"likes" : {$gt : 10}})
+--6.documents whose likes are greater than 100 and having title either mongodb or by john
+db.books.find
+(
+    {
+        $and : 
+        [
+            {"likes" : {$gt : 100}}, 
+            {
+                $or: 
+                [
+                    {"title" : "mongodb"}, 
+                    {"by" : "john"}
+                ] 
+            }
+        ]
+    }
+)
+--7.update title
+db.books.updateOne
+(
+    {"title" : "mongodb"}, 
+    {
+        $set : {"title" : "mongodb overview"}
+    }
+)
+--8.delete nosql overview
+db.books.deleteMany({"title" : "nosql overview"})
+--9.exactly two by john
+db.books.aggregate
+(
+    [
+        {$match : {"by" : "john"}}, 
+        {$limit : 2}
+    ]
+)
+--10.2nd of john
+db.books.aggregate
+(
+    [
+        {$match : {"by" : "john"}}, 
+        {$sort: {"title" : -1}}, 
+        {$limit: 1}
+    ]
+)
+--11.display all in sorted form
+db.books.aggregate
+(
+    [
+        { $sort: { "title": 1 }}
+    ]
+)
+--12.insert using save method
+--save is not supported in later versions so,
+var myDocument = 
+{
+    _id: 1,  // If _id is specified, it will be used as the unique identifier
+    name: "John Doe",
+    age: 25,
+    address: 
+    {
+        city: "New York",
+        state: "NY"
+    }
+}
+
+db.books.insertOne(myDocument)

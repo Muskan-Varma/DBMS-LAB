@@ -1,0 +1,79 @@
+-- Sample data creation
+CREATE TABLE TE (
+  roll NUMBER,
+  div VARCHAR2(5),
+  name VARCHAR2(50),
+  marks NUMBER
+);
+
+CREATE TABLE A_Div_Students AS SELECT * FROM TE WHERE div = 'A' AND 1 = 0;
+CREATE TABLE B_Div_Students AS SELECT * FROM TE WHERE div = 'B' AND 1 = 0;
+
+DROP TABLE TE;
+DROP TABLE A_Div_Students;
+DROP TABLE B_Div_Students;
+
+INSERT ALL
+    INTO TE VALUES (1, 'A', 'John', 85)
+    INTO TE VALUES (2, 'B', 'Alice', 90)
+    INTO TE VALUES (3, 'A', 'Bob', 78)
+    INTO TE VALUES (4, 'B', 'Eve', 95)
+    INTO TE VALUES (5, 'A', 'Charlie', 88)
+    INTO TE VALUES (6, 'B', 'David', 92)
+SELECT * FROM dual;
+
+-- PL/SQL block
+DECLARE
+
+  CURSOR c_students IS
+    SELECT roll, div, name, marks
+    FROM TE
+    ORDER BY div, marks DESC; -- Order by division and marks in descending order
+
+  v_division TE.div%TYPE;
+  v_topper_name VARCHAR2(50);
+  v_topper_marks NUMBER;
+
+BEGIN 
+
+  -- Populate division-wise tables with student records
+  FOR student_rec IN c_students LOOP
+    IF student_rec.div = 'A' THEN
+      INSERT INTO A_Div_Students VALUES (student_rec.roll, student_rec.div, student_rec.name, student_rec.marks);
+    ELSIF student_rec.div = 'B' THEN
+      INSERT INTO B_Div_Students VALUES (student_rec.roll, student_rec.div, student_rec.name, student_rec.marks);
+    END IF;
+  END LOOP;
+
+  FOR student_rec IN c_students LOOP
+    IF v_division IS NULL OR v_division <> student_rec.div THEN
+      -- Display topper for the previous division (if any)
+      IF v_division IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('Topper in Division ' || v_division || ': ' || v_topper_name || ' with marks ' || v_topper_marks);
+      END IF;
+
+      -- Initialize for the new division
+      v_division := student_rec.div;
+      v_topper_name := student_rec.name;
+      v_topper_marks := student_rec.marks;
+    END IF;
+
+    -- Update topper information if the current student has higher marks
+    IF student_rec.marks > v_topper_marks THEN
+      v_topper_name := student_rec.name;
+      v_topper_marks := student_rec.marks;
+    END IF;
+  END LOOP;
+
+  -- Display topper for the last division
+  IF v_division IS NOT NULL THEN
+    DBMS_OUTPUT.PUT_LINE('Topper in Division ' || v_division || ': ' || v_topper_name || ' with marks ' || v_topper_marks);
+  END IF;
+END;
+/
+
+SELECT * FROM A_Div_Students;
+
+SELECT * FROM B_Div_Students;
+
+SELECT * FROM TE;

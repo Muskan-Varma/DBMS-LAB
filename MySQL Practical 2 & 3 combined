@@ -1,0 +1,373 @@
+create database prdb3;
+Query OK, 1 row affected (0.01 sec)
+
+mysql> use prdb3;
+Database changed
+mysql> CREATE TABLE Dept (
+    ->     Deptno INT PRIMARY KEY,
+    ->     Name VARCHAR(255),
+    ->     Location VARCHAR(255),
+    ->     Managerempid INT,
+    ->     CONSTRAINT chk_gender CHECK (Gender IN ('M', 'F'))
+    -> );
+Query OK, 0 rows affected (0.23 sec)
+
+mysql> 
+mysql> CREATE TABLE Employees (
+    ->     empid INT PRIMARY KEY,
+    ->     name VARCHAR(255),
+    ->     address VARCHAR(255),
+    ->     city VARCHAR(255),
+    ->     dob DATE,
+    ->     date_of_joining DATE,
+    ->     gender CHAR(1),
+    ->     salary DECIMAL(10, 2),
+    ->     deptno INT,
+    ->     CONSTRAINT fk_deptno FOREIGN KEY (deptno) REFERENCES Dept(Deptno)
+    -> );
+Query OK, 0 rows affected (0.26 sec)
+
+mysql> 
+mysql> CREATE TABLE Project (
+    ->     Projectid INT PRIMARY KEY,
+    ->     title VARCHAR(255),
+    ->     city VARCHAR(255)
+    -> );
+Query OK, 0 rows affected (0.18 sec)
+
+mysql> 
+mysql> CREATE TABLE Works (
+    ->     empid INT,
+    ->     Projectid INT,
+    ->     total_hrs_worked INT,
+    ->     PRIMARY KEY (empid, Projectid),
+    ->     CONSTRAINT fk_empid FOREIGN KEY (empid) REFERENCES Employees(empid),
+    ->     CONSTRAINT fk_Projectid FOREIGN KEY (Projectid) REFERENCES Project(Projectid)
+    -> );
+Query OK, 0 rows affected (0.22 sec)
+
+mysql> 
+mysql> CREATE TABLE Dependant (
+    ->     empid INT,
+    ->     name_of_dependant VARCHAR(255),
+    ->     age INT,
+    ->     relation VARCHAR(255),
+    ->     PRIMARY KEY (empid, name_of_dependant),
+    ->     CONSTRAINT fk_empid_dependant FOREIGN KEY (empid) REFERENCES Employees(empid)
+    -> );
+Query OK, 0 rows affected (0.19 sec)
+
+mysql> -- You can insert sample data into each table using INSERT statements.
+mysql> -- I'll provide a basic example for one record in each table.
+mysql> 
+mysql> INSERT INTO Dept (Deptno, Name, Location, Managerempid)
+    -> VALUES (1, 'Development', 'Building 1', 101);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> 
+mysql> INSERT INTO Employees (empid, name, address, city, dob, date_of_joining, gender, salary, deptno)
+    -> VALUES (101, 'John Doe', '123 Main St', 'New York', '1990-05-15', '2010-07-01', 'M', 60000.00, 1);
+Query OK, 1 row affected (0.02 sec)
+
+mysql> 
+mysql> INSERT INTO Project (Projectid, title, city)
+    -> VALUES (1, 'Banking Project', 'Pune');
+Query OK, 1 row affected (0.03 sec)
+
+mysql> 
+mysql> INSERT INTO Works (empid, Projectid, total_hrs_worked)
+    -> VALUES (101, 1, 40);
+Query OK, 1 row affected (0.03 sec)
+
+mysql> 
+mysql> INSERT INTO Dependant (empid, name_of_dependant, age, relation)
+    -> VALUES (101, 'Jane Doe', 30, 'Spouse');
+Query OK, 1 row affected (0.02 sec)
+
+mysql> ALTER TABLE Employees
+    -> ADD COLUMN Mobile_number VARCHAR(15);
+Query OK, 0 rows affected (0.51 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> UPDATE Employees
+    -> SET Mobile_number = '123-456-7890'
+    -> WHERE empid BETWEEN 101 AND 300;
+Query OK, 1 row affected (0.02 sec)
+Rows matched: 1  Changed: 1  Warnings: 0
+
+mysql> DELETE FROM Project
+    -> WHERE title = 'Testing Project';
+Query OK, 0 rows affected (0.00 sec)
+
+mysql> SELECT *
+    -> FROM Employees
+    -> WHERE name LIKE 'S%';
+Empty set (0.00 sec)
+
+mysql> SELECT *
+    -> FROM Dept
+    -> WHERE Location = 'Building 1';
++--------+-------------+------------+--------------+
+| Deptno | Name        | Location   | Managerempid |
++--------+-------------+------------+--------------+
+|      1 | Development | Building 1 |          101 |
++--------+-------------+------------+--------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT *
+    -> FROM Employees
+    -> WHERE YEAR(date_of_joining) BETWEEN 2019 AND 2020;
+Empty set (0.00 sec)
+
+mysql> SELECT *
+    -> FROM Employees
+    -> WHERE salary > 50000.00;
++-------+----------+-------------+----------+------------+-----------------+--------+----------+--------+---------------+
+| empid | name     | address     | city     | dob        | date_of_joining | gender | salary   | deptno | Mobile_number |
++-------+----------+-------------+----------+------------+-----------------+--------+----------+--------+---------------+
+|   101 | John Doe | 123 Main St | New York | 1990-05-15 | 2010-07-01      | M      | 60000.00 |      1 | 123-456-7890  |
++-------+----------+-------------+----------+------------+-----------------+--------+----------+--------+---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT *
+    -> FROM Project
+    -> WHERE city = 'Pune';
++-----------+-----------------+------+
+| Projectid | title           | city |
++-----------+-----------------+------+
+|         1 | Banking Project | Pune |
++-----------+-----------------+------+
+1 row in set (0.00 sec)
+
+mysql> SELECT *
+    -> FROM Dependant
+    -> WHERE empid = 102;
+Empty set (0.00 sec)
+
+mysql> SELECT E.name AS Manager_Name
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.empid = D.Managerempid;
++--------------+
+| Manager_Name |
++--------------+
+| John Doe     |
++--------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT empid, name, DATEDIFF(CURRENT_DATE, dob) / 365 AS Age
+    -> FROM Employees;
++-------+----------+---------+
+| empid | name     | Age     |
++-------+----------+---------+
+|   101 | John Doe | 33.3534 |
++-------+----------+---------+
+1 row in set (0.00 sec)
+
+mysql> SELECT empid, name, DATEDIFF(CURRENT_DATE, dob) / 365 AS Age
+    -> FROM Employees
+    -> ORDER BY Age DESC;
++-------+----------+---------+
+| empid | name     | Age     |
++-------+----------+---------+
+|   101 | John Doe | 33.3534 |
++-------+----------+---------+
+1 row in set (0.00 sec)
+
+mysql> SELECT E.*
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> WHERE MONTH(E.dob) = 1 AND D.Name = 'Computer';
+Empty set (0.00 sec)
+
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> INNER JOIN Works W ON E.empid = W.empid
+    -> INNER JOIN Project P ON W.Projectid = P.Projectid
+    -> WHERE P.title = 'ERP system';
+Empty set (0.00 sec)
+
+mysql> select * from Dept;
++--------+-------------+------------+--------------+
+| Deptno | Name        | Location   | Managerempid |
++--------+-------------+------------+--------------+
+|      1 | Development | Building 1 |          101 |
++--------+-------------+------------+--------------+
+1 row in set (0.00 sec)
+
+mysql> select * from Employees;
++-------+----------+-------------+----------+------------+-----------------+--------+----------+--------+---------------+
+| empid | name     | address     | city     | dob        | date_of_joining | gender | salary   | deptno | Mobile_number |
++-------+----------+-------------+----------+------------+-----------------+--------+----------+--------+---------------+
+|   101 | John Doe | 123 Main St | New York | 1990-05-15 | 2010-07-01      | M      | 60000.00 |      1 | 123-456-7890  |
++-------+----------+-------------+----------+------------+-----------------+--------+----------+--------+---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT E.name, E.city
+    -> FROM Employees E
+    -> INNER JOIN Works W ON E.empid = W.empid
+    -> INNER JOIN Project P ON W.Projectid = P.Projectid
+    -> WHERE P.title = 'Banking Project';
++----------+----------+
+| name     | city     |
++----------+----------+
+| John Doe | New York |
++----------+----------+
+1 row in set (0.00 sec)
+
+mysql> SELECT SUM(total_hrs_worked) AS total_hours
+    -> FROM Works
+    -> WHERE Projectid = (SELECT Projectid FROM Project WHERE title = 'Banking Project');
++-------------+
+| total_hours |
++-------------+
+|          40 |
++-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT E.name, E.city
+    -> FROM Employees E
+    -> INNER JOIN Works W ON E.empid = W.empid
+    -> INNER JOIN Project P ON W.Projectid = P.Projectid
+    -> WHERE E.city = P.city;
+Empty set (0.00 sec)
+
+mysql> SELECT E.name, E.city
+    -> FROM Employees E
+    -> INNER JOIN Employees M ON E.Managerempid = M.empid
+    -> WHERE E.city = M.city AND E.address = M.address;
+ERROR 1054 (42S22): Unknown column 'E.Managerempid' in 'on clause'
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> WHERE E.empid NOT IN (SELECT empid FROM Works WHERE Projectid = (SELECT Projectid FROM Project WHERE title = 'Banking Project'));
+Empty set (0.00 sec)
+
+mysql> SELECT D.Name AS Department, AVG(E.salary) AS AverageSalary
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> GROUP BY D.Name;
++-------------+---------------+
+| Department  | AverageSalary |
++-------------+---------------+
+| Development |  60000.000000 |
++-------------+---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT E1.name
+    -> FROM Employees E1
+    -> WHERE E1.salary > ALL (SELECT E2.salary FROM Employees E2 WHERE E2.deptno = (SELECT Deptno FROM Dept WHERE Name = 'Testing'));
++----------+
+| name     |
++----------+
+| John Doe |
++----------+
+1 row in set (0.00 sec)
+
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> WHERE E.salary > (SELECT AVG(E2.salary) FROM Employees E2 WHERE E2.deptno = D.Deptno);
+Empty set (0.00 sec)
+
+mysql> SELECT D.Name AS Department, COUNT(*) AS EmployeeCount
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> GROUP BY D.Name
+    -> ORDER BY EmployeeCount DESC
+    -> LIMIT 1;
++-------------+---------------+
+| Department  | EmployeeCount |
++-------------+---------------+
+| Development |             1 |
++-------------+---------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT D.Name AS Department, SUM(E.salary) AS TotalSalary
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> GROUP BY D.Name
+    -> ORDER BY TotalSalary ASC
+    -> LIMIT 1;
++-------------+-------------+
+| Department  | TotalSalary |
++-------------+-------------+
+| Development |    60000.00 |
++-------------+-------------+
+1 row in set (0.00 sec)
+
+mysql> SELECT P.title AS Project, GROUP_CONCAT(E.name) AS Employees
+    -> FROM Project P
+    -> LEFT JOIN Works W ON P.Projectid = W.Projectid
+    -> LEFT JOIN Employees E ON W.empid = E.empid
+    -> GROUP BY P.title;
++-----------------+-----------+
+| Project         | Employees |
++-----------------+-----------+
+| Banking Project | John Doe  |
++-----------------+-----------+
+1 row in set (0.00 sec)
+
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> LEFT JOIN Works W ON E.empid = W.empid
+    -> WHERE W.Projectid IS NULL;
+Empty set (0.00 sec)
+
+mysql> -- Employees without projects
+mysql> SELECT E.name AS Employee, 'No Project' AS Assignment
+    -> FROM Employees E
+    -> LEFT JOIN Works W ON E.empid = W.empid
+    -> WHERE W.Projectid IS NULL
+    -> 
+    -> UNION ALL
+    -> 
+    -> -- Projects without employees
+    -> SELECT 'No Employee' AS Employee, P.title AS Assignment
+    -> FROM Project P
+    -> LEFT JOIN Works W ON P.Projectid = W.Projectid
+    -> WHERE W.empid IS NULL;
+Empty set (0.00 sec)
+
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> WHERE D.Location = 'Main Building';
+Empty set (0.00 sec)
+
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> INNER JOIN Works W ON E.empid = W.empid
+    -> INNER JOIN Project P ON W.Projectid = P.Projectid
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> WHERE D.Name = 'Development'
+    -> GROUP BY E.empid
+    -> HAVING COUNT(W.Projectid) > 2;
+Empty set (0.00 sec)
+
+mysql> SELECT E.name
+    -> FROM Employees E
+    -> INNER JOIN Dept D ON E.deptno = D.Deptno
+    -> WHERE D.Name = 'Testing'
+    -> ORDER BY E.date_of_joining ASC
+    -> LIMIT 1;
+Empty set (0.00 sec)
+
+mysql> CREATE VIEW EmployeesInPune AS
+    -> SELECT P.city AS ProjectLocation, COUNT(E.empid) AS EmployeeCount
+    -> FROM Employees E
+    -> INNER JOIN Works W ON E.empid = W.empid
+    -> INNER JOIN Project P ON W.Projectid = P.Projectid
+    -> WHERE P.city = 'Pune'
+    -> GROUP BY P.city;
+Query OK, 0 rows affected (0.03 sec)
+
+mysql> SELECT SUM(EmployeeCount * 1000) AS TotalTravelingAllowance
+    -> FROM EmployeesInPune;
++-------------------------+
+| TotalTravelingAllowance |
++-------------------------+
+|                    1000 |
++-------------------------+
+1 row in set (0.00 sec)
+
+mysql> 
+

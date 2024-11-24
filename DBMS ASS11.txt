@@ -1,0 +1,68 @@
+
+--1.number of books by john
+db.books.countDocuments
+(
+    {"by" : "john"}
+)
+--2.with minimum likes and maximum likes by john
+db.books.aggregate
+(
+    [
+        {$match : {"by" : "john"}}, 
+        {
+            $group : 
+            {
+                _id : "$by", 
+                minimum : {$min : "$likes"}
+            }
+        }
+    ]
+)
+db.books.aggregate
+(
+    [
+        {$match : {"by" : "john"}}, 
+        {
+            $group : 
+            {
+                _id : "$by", 
+                maximum : {$max : "$likes"}
+            }
+        }
+    ]
+)
+--3.find average no. of likes of john
+db.books.aggregate
+(
+    [
+        {$match : {"by" : "john"}}, 
+        {
+            $group : 
+            {
+                _id : "$by", 
+                averagelikes : {$avg : "$likes"}
+            }
+        }
+    ]
+)
+--4.first and last by john
+db.books.aggregate
+(
+    [
+        {$match : {"by" : "john"}}, 
+        {
+            $group : 
+            {
+                _id : "$by", 
+                firstbook : {$first : "$title"}, 
+                lastbook : {$last : "$title"}
+            }
+        }
+    ]
+)
+--5.create index on author name
+db.books.createIndex({"by" : 1})
+--6.by john books check if it uses index which we have created
+db.books.getIndexes()
+or
+db.Books.find({ BY: "John" }).explain("executionStats")
